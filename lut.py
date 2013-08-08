@@ -47,20 +47,20 @@ def _build_lut(node, sigval, i, o):
 def _build_mux6(I0, I1, I2, I3, s0, s1, o):
 	return Instance("LUT6", i_I0=s0, i_I1=I1, i_I2=s1, i_I3=I1, i_I4=I0, i_I5=I2, o_O=o, p_INIT="DFD5DAD08F858A80")
 
-def __build_luts(node, sigval, o):
+def _build_luts(node, sigval, o):
 	if list(sigval.values()).count(None) > 6:
 		luts = []
 		s = filter(lambda k,v : v == None, sigval.items())
 		s0,s1 = s[0],s[1]
 		I0,I1,I2,I3 = [Signal() for i in range(4)]
 		sigval[s0], sigval[s1] = False, False
-		luts += __build_luts(node, sigval, I0)
+		luts += _build_luts(node, sigval, I0)
 		sigval[s0], sigval[s1] = False, True
-		luts += __build_luts(node, sigval, I1)
+		luts += _build_luts(node, sigval, I1)
 		sigval[s0], sigval[s1] = True, False
-		luts += __build_luts(node, sigval, I2)
+		luts += _build_luts(node, sigval, I2)
 		sigval[s0], sigval[s1] = True, True
-		luts += __build_luts(node, sigval, I3)
+		luts += _build_luts(node, sigval, I3)
 		luts += [_build_mux6(I0,I1,I2,I3,s0,s1,o)]
 		sigval[s0], sigval[s1] = None, None
 		return luts
@@ -73,5 +73,5 @@ def synthesize_luts(f):
 			raise NotImplementedError("Assign statements only (got {0})".format(a))
 		sigval = OrderedDict()
 		_build_sigval(a.r, sigval)
-		f.specials.add(*__build_luts(a.r, sigval, a.l))
+		f.specials.add(*_build_luts(a.r, sigval, a.l))
 	f.comb = []
