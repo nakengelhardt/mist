@@ -1,29 +1,31 @@
 from migen.fhdl.std import *
 from migen.fhdl import edif
-from migen.fhdl.tools import list_special_ios
+
 import mist
 
 class Test(Module):
-	def __init__(self, i, o):
-		self.comb += o.eq(i[0] & (i[1] | i[2]))
+	def __init__(self):
+		self.o = Signal()
+		self.i = [Signal() for x in range(3)]
+		self.a = Signal()
+		self.b = Signal()
+		self.x = Signal()
+
+		self.sync += self.x.eq(self.a | self.b)
+		self.comb += self.o.eq(self.i[0] & (self.i[1] | self.i[2]))
+
+		self.clock_domains.cd_sys = ClockDomain()
 
 
-o = Signal()
-i = [Signal() for x in range(3)]
+t = Test()
 
-
-t = Test(i, o).get_fragment()
-
-mist.transform(t)
-
-print(list_special_ios(t, True, True, True))
+f = t.get_fragment()
+mist.synthesize(f)
 
 name = "Example"
 device = "xc6slx45-fgg484-2"
 cell_library = "UNISIMS"
 vendor = "Xilinx"
-ios = {o}
-for x in i:
-	ios.add(x)
-print(edif.convert(t, ios, cell_library, vendor, device, name))
-
+ios = {t.o, t.a, t.b, t.x, t.cd_sys.clk, t.cd_sys.rst}
+ios.update(t.i)
+print(edif.convert(f, ios, cell_library, vendor, device, name))
