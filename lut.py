@@ -14,7 +14,7 @@ def _eval_op(node, sigval):
 		if node.op == "^":
 			return _eval_op(node.operands[0], sigval) ^ _eval_op(node.operands[1], sigval)
 		if node.op == "~":
-			return ~_eval_op(node.operands[0], sigval)
+			return ~_eval_op(node.operands[0], sigval) & 1
 	if isinstance(node, Signal):
 		assert sigval[node] != None
 		return sigval[node]
@@ -63,11 +63,11 @@ def _build_luts(node, sigval, o):
 		luts += _build_luts(node, sigval, I2)
 		sigval[s0], sigval[s1] = 1, 1
 		luts += _build_luts(node, sigval, I3)
-		luts += [_build_mux6(I0,I1,I2,I3,s0,s1,o)]
+		luts += [_build_mux6(I0, I1, I2, I3, s0, s1, o)]
 		sigval[s0], sigval[s1] = None, None
 		return luts
 	else:
-		return [_build_lut(node, sigval, [k for k,v in sigval.items() if v == None], o)]
+		return [_build_lut(node, sigval, [k for k, v in sigval.items() if v == None], o)]
 
 
 def synthesize_luts(f):
