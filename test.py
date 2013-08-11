@@ -28,9 +28,9 @@ name = "Example"
 device = "xc6slx45-fgg484-2"
 cell_library = "UNISIMS"
 vendor = "Xilinx"
-ios = {t.o, t.a, t.b, t.x, t.cd_sys.clk, t.cd_sys.rst}
+ios = {t.o, t.a, t.b, t.x, t.cd_sys.clk, t.cd_sys.rst, t.t}
 ios.update(t.i)
 
-ios = set(mist.synthesize(f, ios).values())
+mist.synthesize(f, ios)
 
 print(edif.convert(f, ios, cell_library, vendor, device, name))
