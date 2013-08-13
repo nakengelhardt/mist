@@ -28,7 +28,7 @@ def _build_conditional_expr(condcontext, node, sd=None):
 		for statement in node:
 			_build_conditional_expr(condcontext, statement, sd)
 
-	if isinstance(node, _Assign):
+	elif isinstance(node, _Assign):
 		assert(isinstance(node.l, Signal))	
 		l = node.l
 		t = node.r
@@ -41,7 +41,7 @@ def _build_conditional_expr(condcontext, node, sd=None):
 		else:
 			sd[l] = t
 
-	if isinstance(node, If):
+	elif isinstance(node, If):
 		if condcontext is not None:
 			cond = condcontext & node.cond
 			notcond = condcontext & (~node.cond)
@@ -51,7 +51,7 @@ def _build_conditional_expr(condcontext, node, sd=None):
 		_build_conditional_expr(cond, node.t, sd)
 		_build_conditional_expr(notcond, node.f, sd)
 
-	if isinstance(node, Case):
+	elif isinstance(node, Case):
 		defaultcond = None
 		for k in node.cases.keys():
 			if k != "default":
@@ -77,7 +77,7 @@ def _build_conditional_expr(condcontext, node, sd=None):
 	
 	return sd
 
-def lower_conditionals(f):
+def lower_processes(f):
 	# gets called after synthesize_fd, so sync is already empty
 	sd = _build_conditional_expr(None, f.comb)
-	f.comb = [k.eq(sd[k]) for k in sd.keys()]
+	f.comb = [k.eq(v) for k, v in sd.items()]

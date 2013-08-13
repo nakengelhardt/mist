@@ -1,6 +1,4 @@
 from migen.fhdl.std import *
-from migen.fhdl import edif
-from migen.fhdl.specials import Tristate
 from mibuild.platforms import m1
 
 import mist
