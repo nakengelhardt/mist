@@ -4,18 +4,19 @@ from mibuild.platforms import m1
 import mist
 
 class Test(Module):
-	def __init__(self, a, b, x, o):
-		self.sync += x.eq(a | b)
-		self.comb += o.eq(a & b), If(a, b.eq(x)).Else(b.eq(a))
+	def __init__(self, btn1, btn2, btn3, led1, led2):
+		self.sync += led1.eq(btn1 | btn2)
+		self.comb += [
+			led2.eq(1),
+			If(btn3, led2.eq(btn1 | btn2)).Else(led2.eq(btn1 & btn2))
+		]
 
 m1 = m1.Platform()
 
-a = m1.request("user_btn")
-b = m1.request("user_btn")
-x = m1.request("user_led")
-o = m1.request("user_led")
+btn1, btn2, btn3 = (m1.request("user_btn") for i in range(3))
+led1, led2 = (m1.request("user_led") for i in range(2))
 
-t = Test(a, b, x, o)
+t = Test(btn1, btn2, btn3, led1, led2)
 
 #f = t.get_fragment()
 #m1.finalize(f)
@@ -23,4 +24,4 @@ t = Test(a, b, x, o)
 #v_src, named_sc, named_pc = m1.get_verilog(f)
 #print(v_src)
 
-m1.build(t, mode="mist", run=False)
+m1.build(t, mode="mist")
