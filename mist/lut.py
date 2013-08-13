@@ -15,9 +15,24 @@ def _eval_op(node, sigval):
 			return _eval_op(node.operands[0], sigval) ^ _eval_op(node.operands[1], sigval)
 		if node.op == "~":
 			return ~_eval_op(node.operands[0], sigval) & 1
+		if node.op == "m":
+			return (_eval_op(node.operands[0], sigval) & _eval_op(node.operands[1], sigval)) | (~_eval_op(node.operands[0], sigval) & _eval_op(node.operands[2], sigval))
+		if node.op == "==":
+			return _eval_op(node.operands[0], sigval) == _eval_op(node.operands[1], sigval)
+		if node.op == "!=":
+			return _eval_op(node.operands[0], sigval) != _eval_op(node.operands[1], sigval)
 	if isinstance(node, Signal):
 		assert sigval[node] != None
 		return sigval[node]
+	if isinstance(node, int):
+		assert 0 <= node <= 1
+		return node
+	if isinstance(node, bool):
+		if node:
+			return 1
+		else:
+			return 0
+	raise ValueError("Unsupported node type ({})".format(node))
 
 def _build_sigval(node, sigval):
 	if isinstance(node, _Operator):
