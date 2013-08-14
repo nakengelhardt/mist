@@ -16,7 +16,7 @@ def _eval_op(node, sigval):
 		if node.op == "~":
 			return ~_eval_op(node.operands[0], sigval) & 1
 		if node.op == "m":
-			return (_eval_op(node.operands[0], sigval) & _eval_op(node.operands[1], sigval)) | (~_eval_op(node.operands[0], sigval) & _eval_op(node.operands[2], sigval))
+			return _eval_op(node.operands[1], sigval) if _eval_op(node.operands[0], sigval) else _eval_op(node.operands[2], sigval)
 		if node.op == "==":
 			return _eval_op(node.operands[0], sigval) == _eval_op(node.operands[1], sigval)
 		if node.op == "!=":
