@@ -8,7 +8,7 @@ from mist.lowering import extract_special_expr, lower_processes
 def synthesize(f, ios):
 	if not isinstance(f, _Fragment):
 		f = f.get_fragment()
-	newios = add_iobufs(f,ios)
+	add_iobufs(f, ios)
 	extract_special_expr(f)
 	synthesize_fds(f)
 	lower_processes(f)
