@@ -53,11 +53,17 @@ def _build_tt(node, sigval, ui):
 
 def _build_lut(node, sigval, i, o):
 	size = len(i)
-	tt = _build_tt(node, sigval, i)
-	inputs = {}
-	for k in range(size):
-		inputs["i_I{}".format(k)]=i[k]
-	return Instance("LUT{}".format(size), o_O=o, p_INIT=("{:0"+str(2**(max(0,size-2)))+"X}").format(tt), **inputs)
+	if size > 0:
+		tt = _build_tt(node, sigval, i)
+		inputs = {}
+		for k in range(size):
+			inputs["i_I{}".format(k)]=i[k]
+		return Instance("LUT{}".format(size), o_O=o, p_INIT=("{:0"+str(2**(max(0,size-2)))+"X}").format(tt), **inputs)
+	else:
+		if _eval_op(node, sigval):
+			return Instance("VCC", o_P=o)
+		else:
+			return Instance("GND", o_G=o)
 	
 def _build_mux6(I0, I1, I2, I3, s0, s1, o):
 	return Instance("LUT6", i_I0=s0, i_I1=I1, i_I2=s1, i_I3=I1, i_I4=I0, i_I5=I2, o_O=o, p_INIT="DFD5DAD08F858A80")

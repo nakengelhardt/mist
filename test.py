@@ -5,10 +5,10 @@ import mist
 
 class Test(Module):
 	def __init__(self, btn1, btn2, btn3, led1, led2):
-		self.sync += led1.eq(btn1 | btn2)
+		self.sync += led1.eq(0)
 		self.comb += [
 			led2.eq(1),
-			If(btn3, led2.eq(btn1 | btn2)).Else(led2.eq(btn1 & btn2))
+			If(btn3, led2.eq(btn1 | btn2)).Else(led2.eq(btn1 & Signal()))
 		]
 
 def main():
@@ -28,6 +28,8 @@ def main():
 	# v_src, named_sc, named_pc = plat.get_verilog(f)
 	# print(v_src)
 
-	plat.build(t, mode="mist")
+	plat.build(t, mode="mist", run=False)
+	#plat.build(t)
 
-main()
+if __name__ == '__main__':
+	main()

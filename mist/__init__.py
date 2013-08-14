@@ -11,5 +11,5 @@ def synthesize(f, ios):
 	add_iobufs(f, ios)
 	extract_special_expr(f)
 	synthesize_fds(f)
-	lower_processes(f)
+	lower_processes(f, ios)
 	synthesize_luts(f)

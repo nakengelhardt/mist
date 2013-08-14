@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from migen.fhdl.size import value_bits_sign
 from migen.fhdl.std import *
-from migen.fhdl.tools import list_signals
+from migen.fhdl.tools import list_signals, list_special_ios
 from migen.fhdl.structure import _Assign
 
 def extract_special_expr(f):
@@ -21,8 +21,6 @@ def extract_special_expr(f):
 
 
 def _build_conditional_expr(condcontext, node, sd=None):
-	if sd is None:
-		sd = OrderedDict()
 
 	if isinstance(node, (list, tuple)):
 		for statement in node:
@@ -33,11 +31,7 @@ def _build_conditional_expr(condcontext, node, sd=None):
 		l = node.l
 		t = node.r
 		if condcontext is not None:
-			if l in sd:
-				f = sd[l]
-			else:
-				f = l.reset
-			sd[l] = Mux(condcontext, t, f)
+			sd[l] = Mux(condcontext, t, sd[l])
 		else:
 			sd[l] = t
 
@@ -77,7 +71,15 @@ def _build_conditional_expr(condcontext, node, sd=None):
 	
 	return sd
 
-def lower_processes(f):
+def lower_processes(f, ios):
 	# gets called after synthesize_fd, so sync is already empty
-	sd = _build_conditional_expr(None, f.comb)
+	sd = OrderedDict()
+	sped = list_special_ios(f, False, True, True)
+	for s in list_signals(f):
+		if s not in sped:
+			sd[s] = s.reset
+	_build_conditional_expr(None, f.comb, sd)
+	for s in ios:
+		if s in sd and sd[s] == s.reset:
+			del sd[s]
 	f.comb = [k.eq(v) for k, v in sd.items()]
