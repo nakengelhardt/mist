@@ -1,9 +1,7 @@
 from collections import OrderedDict
 
 from migen.fhdl.std import *
-from migen.fhdl.structure import _Fragment, _Operator, _Assign
-from migen.fhdl.specials import Tristate
-from migen.fhdl.tools import list_special_ios
+from migen.fhdl.structure import _Operator, _Assign
 
 def _eval_op(node, sigval):
 	if isinstance(node, _Operator):
