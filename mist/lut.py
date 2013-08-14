@@ -45,11 +45,11 @@ def _build_tt(node, sigval, ui):
 	else:
 		s = ui[-1]
 		sigval[s] = 0
-		tr = _build_tt(node, sigval, ui[0:-1])
+		tr = _build_tt(node, sigval, ui[:-1])
 		sigval[s] = 1
-		tl = _build_tt(node, sigval, ui[0:-1])
+		tl = _build_tt(node, sigval, ui[:-1])
 		sigval[s] = None
-		return (tl << len(ui)) | tr 
+		return (tl << 2**(len(ui) - 1)) | tr 
 
 def _build_lut(node, sigval, i, o):
 	size = len(i)
@@ -66,8 +66,8 @@ def _build_luts(node, sigval, o):
 	if list(sigval.values()).count(None) > 6:
 		luts = []
 		s = filter(lambda k,v : v == None, sigval.items())
-		s0,s1 = s[0],s[1]
-		I0,I1,I2,I3 = [Signal() for i in range(4)]
+		s0, s1 = s[0], s[1]
+		I0, I1, I2, I3 = [Signal() for i in range(4)]
 		sigval[s0], sigval[s1] = 0, 0
 		luts += _build_luts(node, sigval, I0)
 		sigval[s0], sigval[s1] = 0, 1
