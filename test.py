@@ -1,26 +1,24 @@
 from migen.fhdl.std import *
 from mibuild.platforms import m1
 
-import mist
+from mist.arithmetic import RippleCarryAdder
 
 class Test(Module):
-	def __init__(self, btn1, btn2, btn3, led1, led2):
-		self.sync += led1.eq(0)
-		self.comb += [
-			led2.eq(1),
-			If(btn3, led2.eq(btn1 | btn2)).Else(led2.eq(btn1 & Signal()))
-		]
+	def __init__(self, led1, led2):
+		c = Signal(8)
+		d = Signal(8)
+		d_next = Signal(8)
+		self.sync += c.eq(c+1), d.eq(d_next)
+		self.submodules += RippleCarryAdder(d, 1, d_next)
+		self.comb += led1.eq(c[7]), led2.eq(d[7])
 
 def main():
 	plat = m1.Platform()
 
-	btn1 = plat.request("user_btn")
-	btn2 = plat.request("user_btn")
-	btn3 = plat.request("user_btn")
 	led1 = plat.request("user_led")
 	led2 = plat.request("user_led")
 
-	t = Test(btn1, btn2, btn3, led1, led2)
+	t = Test(led1, led2)
 
 	# f = t.get_fragment()
 	# plat.finalize(f)
@@ -28,7 +26,7 @@ def main():
 	# v_src, named_sc, named_pc = plat.get_verilog(f)
 	# print(v_src)
 
-	plat.build(t, mode="mist", run=False)
+	plat.build(t, mode="verilog", run=False)
 	#plat.build(t)
 
 if __name__ == '__main__':
