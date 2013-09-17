@@ -53,13 +53,12 @@ class RippleCarry(Module):
 	def __init__(self, a, b, s, sub=False):
 		bits, signed = value_bits_sign(s)
 		cin = 0
-		carry = Signal()
 		op1 = _give_bits(a, extend=True)
 		op2 = _give_bits(~b, extend=True) if sub else _give_bits(b, extend=True)
 		for bop1, bop2, res in zip(op1, op2, _give_bits(s, extend=False)):
+			carry = Signal()
 			self.submodules += Fulladder(bop1, bop2, res, cin, carry)
 			cin = carry
-			carry = Signal()
 
 class RippleCarryAdder(RippleCarry):
 	def __init__(self, a, b, s):
@@ -68,3 +67,24 @@ class RippleCarryAdder(RippleCarry):
 class RippleCarrySubtractor(RippleCarry):
 	def __init__(self, a, b, s):
 		RippleCarry.__init__(self, a, b, s, sub=True)
+
+class CarryLookahead(Module):
+	def __init__(self, a, b, s, sub=False):
+		bits, signed = value_bits_sign(s)
+		cin = 0
+		op1 = _give_bits(a, extend=True)
+		op2 = _give_bits(~b, extend=True) if sub else _give_bits(b, extend=True)
+		for bop1, bop2, res in zip(op1, op2, _give_bits(s, extend=False)):
+			cout = Signal()
+			x = bop1 ^ bop2
+			self.specials += Instance("XORCY", i_CI=cin, i_LI=x, o_O=res)
+			self.specials += Instance("MUXCY", i_CI=cin, i_DI=bop2, i_S=x, o_O=cout)
+			cin = cout
+
+class CarryLookaheadAdder(RippleCarry):
+	def __init__(self, a, b, s):
+		CarryLookahead.__init__(self, a, b, s, sub=False)
+
+class CarryLookaheadSubtractor(RippleCarry):
+	def __init__(self, a, b, s):
+		CarryLookahead.__init__(self, a, b, s, sub=True)
